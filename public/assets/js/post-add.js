@@ -85,3 +85,56 @@ $.ajax({
       })
       return false;
   })
+  // 获取浏览器地址栏中的id参数
+var id = getUrlParams('id');
+// 当前管理员是在做修改文章操作
+if (id != -1) {
+	// 根据id获取文章的详细信息
+	$.ajax({
+		type: 'get',
+		url: '/posts/' + id,
+		success: function (data) {
+			$.ajax({
+				url: '/categories',
+				type: 'get',
+				success: function (categories) {
+					data.categories = categories;
+					// console.log(data)
+					var html = template('tpl-modify', data);
+					$('#parentBox').html(html);
+				}
+			})
+			
+		}
+	})
+}
+  function getUrlParams(name){
+    var query = location.search.slice(1).split('&')  
+    var value = -1;
+    if(query && query.length>0){
+        query.forEach(item =>{
+            var tmp = item.split('=')      
+        if(name === tmp[0]){
+            value = tmp[1]
+        }
+    })
+    }
+    return value;
+}
+
+//当修改文章信息表单发生提交行为的时候
+$('#parentBox').on('submit','#addForm',function(){
+  //获取管理员在表单中输入的内容
+  var formData = $(this).serialize();
+  //获取管理要修改的文章内容id
+  var id = $(this).attr('data-id');
+  $.ajax({
+    type:'put',
+    url:'/posts/'+ id,
+    data:formData,
+    success:function(){
+      location.href = '/admin/posts.html'
+    }
+  })
+  return false;
+})
